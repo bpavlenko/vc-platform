@@ -270,6 +270,18 @@ namespace VirtoCommerce.Platform.Web
                 }
             });
 
+            notificationManager.RegisterNotificationType(() => new RegistrationInviteNotification(container.Resolve<IEmailNotificationSendingGateway>())
+            {
+                DisplayName = "Registration invite notification",
+                Description = "This notification is sent by email to a client upon registration by invite",
+                NotificationTemplate = new NotificationTemplate
+                {
+                    Subject = PlatformNotificationResource.RegistrationInviteNotificationSubject,
+                    Body = PlatformNotificationResource.RegistrationInviteNotificationBody,
+                    Language = "en-US",
+                }
+            });
+
             //Get initialized modules list sorted by dependency order
             var postInitializeModules = moduleCatalog.CompleteListWithDependencies(moduleCatalog.Modules.OfType<ManifestModuleInfo>())
                 .Where(m => m.ModuleInstance != null && m.State == ModuleState.Initialized)

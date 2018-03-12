@@ -131,6 +131,7 @@
     <Compile Include="Notifications\DefaultSmsNotificationSendingGateway.cs" />
     <Compile Include="Notifications\DefaultSmtpEmailNotificationSendingGateway.cs" />
     <Compile Include="Notifications\RegistrationEmailNotification.cs" />
+    <Compile Include="Notifications\RegistrationInviteNotification.cs" />
     <Compile Include="Notifications\ResetPasswordEmailNotification.cs" />
     <Compile Include="Notifications\NotificationConverter.cs" />
     <Compile Include="Notifications\NotificationManager.cs" />

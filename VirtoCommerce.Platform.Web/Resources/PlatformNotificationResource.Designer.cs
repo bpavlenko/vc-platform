@@ -19,7 +19,7 @@ namespace VirtoCommerce.Platform.Web.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class PlatformNotificationResource {
@@ -57,6 +57,24 @@ namespace VirtoCommerce.Platform.Web.Resources {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please  to register by invite clicking &lt;strong&gt;&lt;a href=&quot;{{ url }}&quot;&gt;here&lt;/a&gt;&lt;/strong&gt;.
+        /// </summary>
+        public static string RegistrationInviteNotificationBody {
+            get {
+                return ResourceManager.GetString("RegistrationInviteNotificationBody", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your login - {{ login }}..
+        /// </summary>
+        public static string RegistrationInviteNotificationSubject {
+            get {
+                return ResourceManager.GetString("RegistrationInviteNotificationSubject", resourceCulture);
             }
         }
         
