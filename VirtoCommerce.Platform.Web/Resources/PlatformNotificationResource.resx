@@ -121,7 +121,7 @@
     <value>Please  to register by invite clicking &lt;strong&gt;&lt;a href="{{ url }}"&gt;here&lt;/a&gt;&lt;/strong&gt;</value>
   </data>
   <data name="RegistrationInviteNotificationSubject" xml:space="preserve">
-    <value>Your login - {{ login }}.</value>
+    <value>Registration by invite</value>
   </data>
   <data name="RegistrationNotificationBody" xml:space="preserve">
     <value>Thank you for registration {{ firstname }} {{ lastname }}!!!</value>

@@ -70,7 +70,7 @@ namespace VirtoCommerce.Platform.Web.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your login - {{ login }}..
+        ///   Looks up a localized string similar to Registration by invite.
         /// </summary>
         public static string RegistrationInviteNotificationSubject {
             get {
