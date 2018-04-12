@@ -58,7 +58,18 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public async Task<IHttpActionResult> Login(UserLogin model)
         {
             var signInManager = _signInManagerFactory();
-            var signInStatus = await signInManager.PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, true);
+            var signInStatus = SignInStatus.Failure;
+            if (model.UserName.Contains("@"))
+            {
+                var userData = await _securityService.FindByEmailAsync(model.UserName, UserDetails.Full);
+                model.UserName = userData.UserName;
+                signInStatus = await signInManager.PasswordSignInAsync(userData.UserName, model.Password, model.RememberMe, true);
+            }
+            else
+            {
+                signInStatus = await signInManager.PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, true);
+
+            }
 
             if (signInStatus == SignInStatus.Success)
             {
@@ -291,7 +302,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("users/create")]
         [ResponseType(typeof(SecurityResult))]
-        [CheckPermission(Permission = PredefinedPermissions.SecurityCreate)]
+        [AllowAnonymous]
         public async Task<IHttpActionResult> CreateAsync(ApplicationUserExtended user)
         {
             ClearSecurityProperties(user);
