@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using CacheManager.Core;
@@ -104,7 +105,7 @@ namespace VirtoCommerce.Platform.Data.Security
                 using (var repository = _platformRepository())
                 {
                     var dbAcount = user.ToDataModel();
-                    if(string.IsNullOrEmpty(user.MemberId))
+                    if (string.IsNullOrEmpty(user.MemberId))
                     {
                         //Use for memberId same account id if its not set (Our current case Contact member 1 - 1 Account workaround). But client may use memberId as for any outer id.
                         dbAcount.MemberId = dbAcount.Id;
@@ -165,7 +166,7 @@ namespace VirtoCommerce.Platform.Data.Security
                         result = new SecurityResult { Errors = new[] { "Account not found." } };
                     }
                     else
-                    {                
+                    {
                         var changedDbAccount = user.ToDataModel();
                         using (var changeTracker = GetChangeTracker(repository))
                         {
@@ -310,8 +311,11 @@ namespace VirtoCommerce.Platform.Data.Security
             request = request ?? new UserSearchRequest();
             var result = new UserSearchResponse();
 
+            var users = new AccountEntity[] { };
             using (var repository = _platformRepository())
             {
+                repository.DisableChangesTracking();
+
                 var query = repository.Accounts;
 
                 if (request.Keyword != null)
@@ -319,38 +323,40 @@ namespace VirtoCommerce.Platform.Data.Security
                     query = query.Where(u => u.UserName.Contains(request.Keyword));
                 }
 
-                if(!string.IsNullOrEmpty(request.MemberId))
+                if (!string.IsNullOrEmpty(request.MemberId))
                 {
                     //Find all accounts with specified memberId
                     query = query.Where(u => u.MemberId == request.MemberId);
+                }
+                else if (!request.MemberIds.IsNullOrEmpty())
+                {
+                    query = query.Where(u => request.MemberIds.Contains(u.MemberId));
                 }
 
                 if (request.AccountTypes != null && request.AccountTypes.Any())
                 {
                     query = query.Where(x => request.AccountTypes.Contains(x.UserType));
                 }
-                result.TotalCount = query.Count();
+                result.TotalCount = await query.CountAsync();
 
-                var users = query.OrderBy(x => x.UserName)
+                users = await query.OrderBy(x => x.UserName)
                                  .Skip(request.SkipCount)
                                  .Take(request.TakeCount)
-                                 .ToArray();
-
-                var extendedUsers = new List<ApplicationUserExtended>();
-
-                foreach (var user in users)
-                {
-                    var extendedUser = await FindByNameAsync(user.UserName, UserDetails.Reduced);
-                    if (extendedUser != null)
-                    {
-                        extendedUsers.Add(extendedUser);
-                    }
-                }
-
-                result.Users = extendedUsers.ToArray();
-
-                return result;
+                                 .ToArrayAsync();                
             }
+            var extendedUsers = new List<ApplicationUserExtended>();
+
+            foreach (var user in users)
+            {
+                var extendedUser = await FindByNameAsync(user.UserName, UserDetails.Reduced);
+                if (extendedUser != null)
+                {
+                    extendedUsers.Add(extendedUser);
+                }
+            }
+            result.Users = extendedUsers.ToArray();
+
+            return result;
         }
 
         public virtual async Task<string> GeneratePasswordResetTokenAsync(string userId)
@@ -421,7 +427,7 @@ namespace VirtoCommerce.Platform.Data.Security
             using (var userManager = _userManagerFactory())
             {
                 await userManager.ResetAccessFailedCountAsync(userId);
-                var  identityResult = await userManager.SetLockoutEndDateAsync(userId, DateTimeOffset.MinValue);
+                var identityResult = await userManager.SetLockoutEndDateAsync(userId, DateTimeOffset.MinValue);
                 var result = identityResult.ToCoreModel();
                 return result;
             }
@@ -552,9 +558,13 @@ namespace VirtoCommerce.Platform.Data.Security
         {
             _cacheManager.Remove($"GetUserById-{userId}", SecurityConstants.CacheRegion);
             _cacheManager.Remove($"GetUserByName-{userName}", SecurityConstants.CacheRegion);
-            foreach(var detailLevel in Enum.GetNames(typeof(UserDetails)))
+            //For normalized user name
+            _cacheManager.Remove($"GetUserByName-{userName.Normalize().ToUpperInvariant()}", SecurityConstants.CacheRegion);
+            foreach (var detailLevel in Enum.GetNames(typeof(UserDetails)))
             {
                 _cacheManager.Remove($"GetUserByName-{userName}-{detailLevel}", SecurityConstants.CacheRegion);
+                //For normalized user name
+                _cacheManager.Remove($"GetUserByName-{userName.Normalize().ToUpperInvariant()}-{detailLevel}", SecurityConstants.CacheRegion);
             }
         }
 
